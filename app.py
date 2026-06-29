@@ -5,13 +5,6 @@ from google import genai
 # App configuration
 st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="centered")
 
-# =========================================================================
-# HARDCODED API KEY CONTROL PANEL
-# Delete the placeholder text below and paste your real key between the ""
-# =========================================================================
-HARDCODED_KEY = "AQ.Ab8RN6K_vEhVqpJYZmPvZ8meWcfxfhRRC0ZDvBBvyG7P3-5U9Q"
-# =========================================================================
-
 # --- INITIALIZE DATABASE SIMULATION ---
 if "user_db" not in st.session_state:
     st.session_state.user_db = {} 
@@ -48,7 +41,6 @@ st.markdown("""
         color: #ffffff !important;
         border: 2px solid #fd00f5 !important;
         border-radius: 10px !important;
-        box-shadow: 0 0 10px rgba(253, 0, 245, 0.2);
     }
     div.stButton > button {
         background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%) !important;
@@ -59,7 +51,6 @@ st.markdown("""
         border-radius: 10px !important;
         padding: 0.75rem 2rem !important;
         width: 100%;
-        box-shadow: 0 0 15px rgba(255, 75, 43, 0.4);
     }
     .answer-box {
         background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(253, 0, 245, 0.1));
@@ -67,7 +58,6 @@ st.markdown("""
         padding: 20px;
         border-radius: 10px;
         margin-top: 15px;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
     }
     .history-card {
         background: rgba(30, 34, 53, 0.9);
@@ -108,12 +98,15 @@ if st.session_state.logged_in_user is None:
                 st.success("Registration successful! Go log in.")
                 
 else:
-    # --- LOGGED IN APP INTERFACE ---
     current_user = st.session_state.logged_in_user
     
     with st.sidebar:
         st.markdown("### 👤 Account Panel")
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
+        
+        st.write("---")
+        st.markdown("### 🔑 Backup API Key")
+        custom_key = st.text_input("Paste AIzaSy Key Here (Optional)", type="password")
         
         st.write("---")
         if st.button("Door Log Out"):
@@ -144,21 +137,31 @@ else:
     user_query = st.text_area("What can I help you solve today?", placeholder="Type your question or problem here...")
     
     if st.button("SOLVE IT"):
-        if HARDCODED_KEY == "" or HARDCODED_KEY.strip() == "":
-            st.error("⚠️ You forgot to paste your actual API key into line 11 of the code on GitHub!")
-        elif user_query.strip() == "":
+        if user_query.strip() == "":
             st.warning("Please type a question first!")
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    # Run strictly using your injected key
-                    client = genai.Client(api_key=HARDCODED_KEY.strip())
-                    response = client.models.generate_content(
-                        model='gemini-1.5-flash',
-                        contents=user_query,
-                    )
-                    st.session_state.current_query = user_query
-                    st.session_state.current_response = response.text
+                    # Smart Key Selector: Use manual input first, then check Streamlit secrets, then system environment
+                    final_key = None
+                    if custom_key.strip():
+                        final_key = custom_key.strip()
+                    elif "GEMINI_API_KEY" in st.secrets:
+                        final_key = st.secrets["GEMINI_API_KEY"]
+                    else:
+                        final_key = os.environ.get("GEMINI_API_KEY")
+                    
+                    if not final_key:
+                        st.error("⚠️ No API Key found! Please add GEMINI_API_KEY to your Streamlit secrets or paste it in the sidebar box.")
+                    else:
+                        client = genai.Client(api_key=final_key)
+                        # Switch to gemini-1.5-flash to completely bypass the 2.5 quota limit block
+                        response = client.models.generate_content(
+                            model='gemini-1.5-flash',
+                            contents=user_query,
+                        )
+                        st.session_state.current_query = user_query
+                        st.session_state.current_response = response.text
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
 
@@ -176,10 +179,3 @@ else:
             st.session_state.chat_history[current_user].append({
                 "query": st.session_state.current_query,
                 "response": st.session_state.current_response
-            })
-            st.toast("Saved to your dashboard panel history!", icon="🔥")
-            st.session_state.current_response = ""
-            st.session_state.current_query = ""
-            st.rerun()
-
-     
