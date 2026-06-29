@@ -9,7 +9,7 @@ st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="center
 # HARDCODED API KEY CONTROL PANEL
 # Delete the placeholder text below and paste your real key between the ""
 # =========================================================================
-HARDCODED_KEY = ""
+HARDCODED_KEY = "AQ.Ab8RN6K_vEhVqpJYZmPvZ8meWcfxfhRRC0ZDvBBvyG7P3-5U9Q"
 # =========================================================================
 
 # --- INITIALIZE DATABASE SIMULATION ---
