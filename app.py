@@ -50,16 +50,6 @@ st.markdown("""
         text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
     }
     
-    /* Center Application Main Card Container */
-    [data-testid="stVerticalBlock"] > div:has(div.stTextArea) {
-        background: rgba(30, 34, 53, 0.75);
-        padding: 30px;
-        border-radius: 16px;
-        border: 2px solid rgba(0, 242, 254, 0.3);
-        box-shadow: 0 8px 32px 0 rgba(0, 242, 254, 0.15);
-        backdrop-filter: blur(8px);
-    }
-    
     /* Neon Pink Border Input Field Box */
     div.stTextArea textarea {
         background-color: #0b0d19 !important;
@@ -157,7 +147,6 @@ else:
     # --- LOGGED IN APP INTERFACE ---
     current_user = st.session_state.logged_in_user
     
-    # Sidebar design element layout
     with st.sidebar:
         st.markdown("### 👤 Account Panel")
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
@@ -213,7 +202,13 @@ else:
         """, unsafe_allow_html=True)
         st.write(st.session_state.current_response)
         
-        st.write("") # Spacer
+        st.write("") 
         if st.button("SAVE TO DASHBOARD"):
             st.session_state.chat_history[current_user].append({
-                "query": st.session_state.current
+                "query": st.session_state.current_query,
+                "response": st.session_state.current_response
+            })
+            st.toast("Saved to your dashboard panel history!", icon="🔥")
+            st.session_state.current_response = ""
+            st.session_state.current_query = ""
+            st.rerun()
