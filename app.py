@@ -15,6 +15,12 @@ else:
 # App configuration
 st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="centered")
 
+# Initialize session state to store chat history for saving
+if "last_query" not in st.session_state:
+    st.session_state.last_query = ""
+if "last_response" not in st.session_state:
+    st.session_state.last_response = ""
+
 # --- CUSTOM BACKGROUND CSS ---
 st.markdown("""
     <style>
@@ -32,8 +38,8 @@ st.markdown("""
         border-radius: 8px !important;
     }
     
-    /* Customizing the Solve button */
-    div.stButton > button {
+    /* Customizing buttons */
+    div.stButton > button, div.stDownloadButton > button {
         background: linear-gradient(90deg, #ff4b4b 0%, #ff7676 100%) !important;
         color: white !important;
         border: none !important;
@@ -42,8 +48,9 @@ st.markdown("""
         border-radius: 8px !important;
         box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3);
         transition: all 0.3s ease;
+        width: 100%;
     }
-    div.stButton > button:hover {
+    div.stButton > button:hover, div.stDownloadButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(255, 75, 75, 0.5);
     }
@@ -69,10 +76,29 @@ if st.button("Solve It"):
                     contents=user_query,
                 )
                 
-                # Display the answer
-                st.success("Solution Ready!")
-                st.markdown("### 📋 Answer:")
-                st.write(response.text)
+                # Save data to session state
+                st.session_state.last_query = user_query
+                st.session_state.last_response = response.text
                 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
+# Display answer and save option if available
+if st.session_state.last_response:
+    st.success("Solution Ready!")
+    st.markdown("### 📋 Answer:")
+    st.write(st.session_state.last_response)
+    
+    # Format the text file contents
+    chat_download_text = f"--- QUICK-SOLVER AI LOG ---\n\nQUESTION:\n{st.session_state.last_query}\n\nANSWER:\n{st.session_state.last_response}\n"
+    
+    # Add spacing before the download button
+    st.write("")
+    
+    # Save Chat Download Button
+    st.download_button(
+        label="📥 Save Chat history",
+        data=chat_download_text,
+        file_name="quick_solver_chat.txt",
+        mime="text/plain"
+    )
