@@ -144,7 +144,7 @@ else:
     user_query = st.text_area("What can I help you solve today?", placeholder="Type your question or problem here...")
     
     if st.button("SOLVE IT"):
-        if HARDCODED_KEY == "AQ.Ab8RN6K_vEhVqpJYZmPvZ8meWcfxfhRRC0ZDvBBvyG7P3-5U9Q" or HARDCODED_KEY.strip() == "":
+        if HARDCODED_KEY == "" or HARDCODED_KEY.strip() == "":
             st.error("⚠️ You forgot to paste your actual API key into line 11 of the code on GitHub!")
         elif user_query.strip() == "":
             st.warning("Please type a question first!")
