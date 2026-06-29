@@ -15,6 +15,42 @@ else:
 # App configuration
 st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="centered")
 
+# --- CUSTOM BACKGROUND CSS ---
+st.markdown("""
+    <style>
+    /* Gradient Background for the entire app */
+    .stApp {
+        background: linear-gradient(135deg, #0f111a 0%, #171926 50%, #0f111a 100%);
+        background-attachment: fixed;
+    }
+    
+    /* Sleek card style for user inputs and responses */
+    div.stTextArea textarea {
+        background-color: #1e2235 !important;
+        color: #ffffff !important;
+        border: 1px solid #3d4466 !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Customizing the Solve button */
+    div.stButton > button {
+        background: linear-gradient(90deg, #ff4b4b 0%, #ff7676 100%) !important;
+        color: white !important;
+        border: none !important;
+        font-weight: bold !important;
+        padding: 0.5rem 2rem !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3);
+        transition: all 0.3s ease;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 75, 75, 0.5);
+    }
+    </style>
+    """, unsafe_allowed_html=True)
+
+# --- APP INTERFACE ---
 st.title("⚡ Quick-Solver AI")
 st.write("Type your question below, and Gemini will solve it instantly!")
 
