@@ -48,7 +48,7 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(255, 75, 75, 0.5);
     }
     </style>
-    """, unsafe_allowed_html=True)
+    """, unsafe_allow_html=True)
 
 # --- APP INTERFACE ---
 st.title("⚡ Quick-Solver AI")
