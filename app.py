@@ -105,10 +105,9 @@ else:
         st.markdown("### 👤 Account Panel")
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
         
-        # ONSCREEN KEY BACKUP INPUT
         st.write("---")
-        st.markdown("### 🔑 API Key Override")
-        custom_key = st.text_input("Paste Fresh API Key Here", type="password")
+        st.markdown("### 🔑 Required API Key")
+        custom_key = st.text_input("Paste Your New API Key", type="password", help="Paste your fresh key here to bypass the exhausted quota error.")
         
         st.write("---")
         if st.button("Door Log Out"):
@@ -139,24 +138,21 @@ else:
     user_query = st.text_area("What can I help you solve today?", placeholder="Type your question or problem here...")
     
     if st.button("SOLVE IT"):
-        if user_query.strip() == "":
+        if not custom_key.strip():
+            st.error("⚠️ Please paste your fresh API key into the sidebar box first!")
+        elif user_query.strip() == "":
             st.warning("Please type a question first!")
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    # Select the correct key: Custom manual key first, environment secret second
-                    final_key = custom_key.strip() if custom_key.strip() else os.environ.get("GEMINI_API_KEY")
-                    
-                    if not final_key:
-                        st.error("No API key detected. Please add it to Secrets or paste it in the sidebar box.")
-                    else:
-                        client = genai.Client(api_key=final_key)
-                        response = client.models.generate_content(
-                            model='gemini-2.5-flash',
-                            contents=user_query,
-                        )
-                        st.session_state.current_query = user_query
-                        st.session_state.current_response = response.text
+                    # STRICTLY use the manual box key input
+                    client = genai.Client(api_key=custom_key.strip())
+                    response = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=user_query,
+                    )
+                    st.session_state.current_query = user_query
+                    st.session_state.current_response = response.text
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
 
