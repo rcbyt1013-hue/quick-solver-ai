@@ -5,6 +5,13 @@ from google import genai
 # App configuration
 st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="centered")
 
+# =========================================================================
+# HARDCODED API KEY CONTROL PANEL
+# Delete the placeholder text below and paste your real key between the ""
+# =========================================================================
+HARDCODED_KEY = "AQ.Ab8RN6K_vEhVqpJYZmPvZ8meWcfxfhRRC0ZDvBBvyG7P3-5U9Q"
+# =========================================================================
+
 # --- INITIALIZE DATABASE SIMULATION ---
 if "user_db" not in st.session_state:
     st.session_state.user_db = {} 
@@ -41,6 +48,7 @@ st.markdown("""
         color: #ffffff !important;
         border: 2px solid #fd00f5 !important;
         border-radius: 10px !important;
+        box-shadow: 0 0 10px rgba(253, 0, 245, 0.2);
     }
     div.stButton > button {
         background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%) !important;
@@ -51,6 +59,7 @@ st.markdown("""
         border-radius: 10px !important;
         padding: 0.75rem 2rem !important;
         width: 100%;
+        box-shadow: 0 0 15px rgba(255, 75, 43, 0.4);
     }
     .answer-box {
         background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(253, 0, 245, 0.1));
@@ -58,6 +67,7 @@ st.markdown("""
         padding: 20px;
         border-radius: 10px;
         margin-top: 15px;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
     }
     .history-card {
         background: rgba(30, 34, 53, 0.9);
@@ -106,10 +116,6 @@ else:
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
         
         st.write("---")
-        st.markdown("### 🔑 Required API Key")
-        custom_key = st.text_input("Paste Your New API Key", type="password", help="Paste your fresh key here to bypass the exhausted quota error.")
-        
-        st.write("---")
         if st.button("Door Log Out"):
             st.session_state.logged_in_user = None
             st.session_state.current_response = ""
@@ -138,15 +144,15 @@ else:
     user_query = st.text_area("What can I help you solve today?", placeholder="Type your question or problem here...")
     
     if st.button("SOLVE IT"):
-        if not custom_key.strip():
-            st.error("⚠️ Please paste your fresh API key into the sidebar box first!")
+        if HARDCODED_KEY == "PASTE_YOUR_ACTUAL_AIzaSy_KEY_HERE" or HARDCODED_KEY.strip() == "":
+            st.error("⚠️ You forgot to paste your actual API key into line 11 of the code on GitHub!")
         elif user_query.strip() == "":
             st.warning("Please type a question first!")
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    # STRICTLY use the manual box key input
-                    client = genai.Client(api_key=custom_key.strip())
+                    # Run strictly using your injected key
+                    client = genai.Client(api_key=HARDCODED_KEY.strip())
                     response = client.models.generate_content(
                         model='gemini-2.5-flash',
                         contents=user_query,
@@ -175,3 +181,5 @@ else:
             st.session_state.current_response = ""
             st.session_state.current_query = ""
             st.rerun()
+
+     
