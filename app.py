@@ -105,10 +105,6 @@ else:
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
         
         st.write("---")
-        st.markdown("### 🔑 Backup API Key")
-        custom_key = st.text_input("Paste AIzaSy Key Here (Optional)", type="password")
-        
-        st.write("---")
         if st.button("Door Log Out"):
             st.session_state.logged_in_user = None
             st.session_state.current_response = ""
@@ -142,16 +138,11 @@ else:
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    final_key = None
-                    if custom_key.strip():
-                        final_key = custom_key.strip()
-                    elif "GEMINI_API_KEY" in st.secrets:
-                        final_key = st.secrets["GEMINI_API_KEY"]
-                    else:
-                        final_key = os.environ.get("GEMINI_API_KEY")
+                    # Look strictly into Streamlit Secrets for your secure API key
+                    final_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
                     
                     if not final_key:
-                        st.error("⚠️ No API Key found! Please add GEMINI_API_KEY to your Streamlit secrets or paste it in the sidebar box.")
+                        st.error("⚠️ No API Key configuration detected in Secrets!")
                     else:
                         client = genai.Client(api_key=final_key)
                         response = client.models.generate_content(
