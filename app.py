@@ -142,7 +142,6 @@ else:
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    # Smart Key Selector: Use manual input first, then check Streamlit secrets, then system environment
                     final_key = None
                     if custom_key.strip():
                         final_key = custom_key.strip()
@@ -155,7 +154,6 @@ else:
                         st.error("⚠️ No API Key found! Please add GEMINI_API_KEY to your Streamlit secrets or paste it in the sidebar box.")
                     else:
                         client = genai.Client(api_key=final_key)
-                        # Switch to gemini-1.5-flash to completely bypass the 2.5 quota limit block
                         response = client.models.generate_content(
                             model='gemini-1.5-flash',
                             contents=user_query,
@@ -179,3 +177,8 @@ else:
             st.session_state.chat_history[current_user].append({
                 "query": st.session_state.current_query,
                 "response": st.session_state.current_response
+            })
+            st.toast("Saved to your dashboard panel history!", icon="🔥")
+            st.session_state.current_response = ""
+            st.session_state.current_query = ""
+            st.rerun()
