@@ -2,16 +2,6 @@ import streamlit as st
 import os
 from google import genai
 
-# Fetch the API key safely from environment variables
-api_key = os.environ.get("GEMINI_API_KEY")
-
-# Initialize the Gemini client
-if api_key:
-    client = genai.Client(api_key=api_key)
-else:
-    st.error("Missing GEMINI_API_KEY. Please add it to your secrets/environment variables.")
-    st.stop()
-
 # App configuration
 st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="centered")
 
@@ -33,15 +23,12 @@ if "current_query" not in st.session_state:
 # --- ULTRA-VIBRANT NEON DESIGN CSS ---
 st.markdown("""
     <style>
-    /* Vibrant abstract neon wavy mesh background */
     .stApp {
         background: radial-gradient(circle at 20% 30%, rgba(0, 242, 254, 0.15), transparent 50%),
                     radial-gradient(circle at 80% 70%, rgba(253, 0, 245, 0.15), transparent 50%),
                     linear-gradient(135deg, #0b0d19 0%, #111428 100%);
         background-attachment: fixed;
     }
-    
-    /* Glowing Neon Titles */
     h1, h2 {
         background: linear-gradient(90deg, #00f2fe, #fd00f5, #ff4b4b);
         -webkit-background-clip: text;
@@ -49,68 +36,35 @@ st.markdown("""
         font-weight: 800 !important;
         text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
     }
-    
-    /* Neon Pink Border Input Field Box */
-    div.stTextArea textarea {
+    div.stTextArea textarea, div.stTextInput input {
         background-color: #0b0d19 !important;
         color: #ffffff !important;
         border: 2px solid #fd00f5 !important;
         border-radius: 10px !important;
-        box-shadow: 0 0 10px rgba(253, 0, 245, 0.2);
     }
-    
-    /* Bright Orange/Red Action Buttons */
     div.stButton > button {
         background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%) !important;
         color: white !important;
         font-size: 18px !important;
         font-weight: bold !important;
-        letter-spacing: 1px;
         border: none !important;
         border-radius: 10px !important;
         padding: 0.75rem 2rem !important;
-        box-shadow: 0 0 15px rgba(255, 75, 43, 0.4);
-        transition: all 0.3s ease;
         width: 100%;
     }
-    div.stButton > button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 25px rgba(255, 75, 43, 0.7);
-    }
-    
-    /* Electric Teal Sidebar Log Out Button */
-    .sidebar .stButton > button {
-        background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
-        box-shadow: 0 0 15px rgba(0, 198, 255, 0.4);
-    }
-    
-    /* Bright Neon Answer Card Wrapper */
     .answer-box {
         background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(253, 0, 245, 0.1));
         border: 2px solid #00f2fe;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
         margin-top: 15px;
     }
-    
-    /* Dashboard History Cards with Purple Accents */
     .history-card {
         background: rgba(30, 34, 53, 0.9);
         padding: 15px;
         border-radius: 10px;
         border-left: 4px solid #fd00f5;
-        border-right: 1px solid rgba(253, 0, 245, 0.2);
-        border-top: 1px solid rgba(253, 0, 245, 0.2);
-        border-bottom: 1px solid rgba(253, 0, 245, 0.2);
         margin-bottom: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-    
-    /* Customization for Workspace Tabs */
-    button[data-baseweb="tab"] {
-        color: #ffffff !important;
-        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -137,7 +91,7 @@ if st.session_state.logged_in_user is None:
             if reg_email == "":
                 st.warning("Email cannot be empty.")
             elif reg_email in st.session_state.user_db:
-                st.warning("Account already exists! Please go to Sign In.")
+                st.warning("Account already exists!")
             else:
                 st.session_state.user_db[reg_email] = True
                 st.session_state.chat_history[reg_email] = []
@@ -151,6 +105,12 @@ else:
         st.markdown("### 👤 Account Panel")
         st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
         
+        # ONSCREEN KEY BACKUP INPUT
+        st.write("---")
+        st.markdown("### 🔑 API Key Override")
+        custom_key = st.text_input("Paste Fresh API Key Here", type="password")
+        
+        st.write("---")
         if st.button("Door Log Out"):
             st.session_state.logged_in_user = None
             st.session_state.current_response = ""
@@ -164,11 +124,11 @@ else:
         if not user_saved_chats:
             st.info("No saved solutions yet.")
         else:
-            for i, item in enumerate(reversed(user_saved_chats)):
+            for item in reversed(user_saved_chats):
                 st.markdown(f"""
                 <div class="history-card">
                     <strong style="color: #fd00f5;">❓ Q: {item['query'][:35]}...</strong><br>
-                    <span style="color: #ffffff; size: 12px;">💡 {item['response'][:55]}...</span>
+                    <span style="color: #ffffff;">💡 {item['response'][:55]}...</span>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -184,12 +144,19 @@ else:
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    response = client.models.generate_content(
-                        model='gemini-2.5-flash',
-                        contents=user_query,
-                    )
-                    st.session_state.current_query = user_query
-                    st.session_state.current_response = response.text
+                    # Select the correct key: Custom manual key first, environment secret second
+                    final_key = custom_key.strip() if custom_key.strip() else os.environ.get("GEMINI_API_KEY")
+                    
+                    if not final_key:
+                        st.error("No API key detected. Please add it to Secrets or paste it in the sidebar box.")
+                    else:
+                        client = genai.Client(api_key=final_key)
+                        response = client.models.generate_content(
+                            model='gemini-2.5-flash',
+                            contents=user_query,
+                        )
+                        st.session_state.current_query = user_query
+                        st.session_state.current_response = response.text
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
 
