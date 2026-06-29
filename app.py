@@ -17,55 +17,118 @@ st.set_page_config(page_title="Quick-Solver AI", page_icon="⚡", layout="center
 
 # --- INITIALIZE DATABASE SIMULATION ---
 if "user_db" not in st.session_state:
-    # A local dictionary simulating a user database
     st.session_state.user_db = {} 
 
 if "logged_in_user" not in st.session_state:
     st.session_state.logged_in_user = None
 
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = {} # Format: {email: [list of chats]}
+    st.session_state.chat_history = {} 
 
 if "current_response" not in st.session_state:
     st.session_state.current_response = ""
 if "current_query" not in st.session_state:
     st.session_state.current_query = ""
 
-# --- CUSTOM DESIGN CSS ---
+# --- ULTRA-VIBRANT NEON DESIGN CSS ---
 st.markdown("""
     <style>
+    /* Vibrant abstract neon wavy mesh background */
     .stApp {
-        background: linear-gradient(135deg, #0f111a 0%, #171926 50%, #0f111a 100%);
+        background: radial-gradient(circle at 20% 30%, rgba(0, 242, 254, 0.15), transparent 50%),
+                    radial-gradient(circle at 80% 70%, rgba(253, 0, 245, 0.15), transparent 50%),
+                    linear-gradient(135deg, #0b0d19 0%, #111428 100%);
         background-attachment: fixed;
     }
-    div.stTextArea textarea {
-        background-color: #1e2235 !important;
-        color: #ffffff !important;
-        border: 1px solid #3d4466 !important;
-        border-radius: 8px !important;
+    
+    /* Glowing Neon Titles */
+    h1, h2 {
+        background: linear-gradient(90deg, #00f2fe, #fd00f5, #ff4b4b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
     }
+    
+    /* Center Application Main Card Container */
+    [data-testid="stVerticalBlock"] > div:has(div.stTextArea) {
+        background: rgba(30, 34, 53, 0.75);
+        padding: 30px;
+        border-radius: 16px;
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(0, 242, 254, 0.15);
+        backdrop-filter: blur(8px);
+    }
+    
+    /* Neon Pink Border Input Field Box */
+    div.stTextArea textarea {
+        background-color: #0b0d19 !important;
+        color: #ffffff !important;
+        border: 2px solid #fd00f5 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 10px rgba(253, 0, 245, 0.2);
+    }
+    
+    /* Bright Orange/Red Action Buttons */
     div.stButton > button {
-        background: linear-gradient(90deg, #ff4b4b 0%, #ff7676 100%) !important;
+        background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%) !important;
         color: white !important;
-        border: none !important;
+        font-size: 18px !important;
         font-weight: bold !important;
-        border-radius: 8px !important;
+        letter-spacing: 1px;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 2rem !important;
+        box-shadow: 0 0 15px rgba(255, 75, 43, 0.4);
+        transition: all 0.3s ease;
         width: 100%;
     }
+    div.stButton > button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 25px rgba(255, 75, 43, 0.7);
+    }
+    
+    /* Electric Teal Sidebar Log Out Button */
+    .sidebar .stButton > button {
+        background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%) !important;
+        box-shadow: 0 0 15px rgba(0, 198, 255, 0.4);
+    }
+    
+    /* Bright Neon Answer Card Wrapper */
+    .answer-box {
+        background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(253, 0, 245, 0.1));
+        border: 2px solid #00f2fe;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        margin-top: 15px;
+    }
+    
+    /* Dashboard History Cards with Purple Accents */
     .history-card {
-        background-color: #1e2235;
+        background: rgba(30, 34, 53, 0.9);
         padding: 15px;
-        border-radius: 8px;
-        border-left: 4px solid #ff4b4b;
-        margin-bottom: 10px;
+        border-radius: 10px;
+        border-left: 4px solid #fd00f5;
+        border-right: 1px solid rgba(253, 0, 245, 0.2);
+        border-top: 1px solid rgba(253, 0, 245, 0.2);
+        border-bottom: 1px solid rgba(253, 0, 245, 0.2);
+        margin-bottom: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* Customization for Workspace Tabs */
+    button[data-baseweb="tab"] {
+        color: #ffffff !important;
+        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- AUTHENTICATION INTERFACE ---
 if st.session_state.logged_in_user is None:
-    st.title("🔐 Quick-Solver AI Gateway")
-    st.write("Please sign in or register with your email to start solving.")
+    st.markdown("<h1 style='text-align: center;'>🔐 Quick-Solver AI Gateway</h1>", unsafe_allow_html=True)
+    st.write("<p style='text-align: center; color: #8a99ad;'>Please sign in or register with your email to access the neon interface.</p>", unsafe_allow_html=True)
     
     tab1, tab2 = st.tabs(["📧 Sign In", "📝 Register New Account"])
     
@@ -88,16 +151,18 @@ if st.session_state.logged_in_user is None:
             else:
                 st.session_state.user_db[reg_email] = True
                 st.session_state.chat_history[reg_email] = []
-                st.success("Registration successful! You can now switch tabs and Log In.")
+                st.success("Registration successful! Go log in.")
                 
 else:
     # --- LOGGED IN APP INTERFACE ---
     current_user = st.session_state.logged_in_user
     
-    # Sidebar layout for Profile & Chat History
+    # Sidebar design element layout
     with st.sidebar:
-        st.markdown(f"### 👤 Logged in as:\n`{current_user}`")
-        if st.button("🚪 Log Out"):
+        st.markdown("### 👤 Account Panel")
+        st.markdown(f"Logged in as: <span style='color: #00f2fe; font-weight: bold;'>{current_user}</span>", unsafe_allow_html=True)
+        
+        if st.button("Door Log Out"):
             st.session_state.logged_in_user = None
             st.session_state.current_response = ""
             st.session_state.current_query = ""
@@ -106,7 +171,6 @@ else:
         st.write("---")
         st.markdown("### 📚 Saved Dashboard Chats")
         
-        # Display saved records
         user_saved_chats = st.session_state.chat_history.get(current_user, [])
         if not user_saved_chats:
             st.info("No saved solutions yet.")
@@ -114,18 +178,18 @@ else:
             for i, item in enumerate(reversed(user_saved_chats)):
                 st.markdown(f"""
                 <div class="history-card">
-                    <strong>❓ Q: {item['query'][:30]}...</strong><br>
-                    <small>💡 {item['response'][:50]}...</small>
+                    <strong style="color: #fd00f5;">❓ Q: {item['query'][:35]}...</strong><br>
+                    <span style="color: #ffffff; size: 12px;">💡 {item['response'][:55]}...</span>
                 </div>
                 """, unsafe_allow_html=True)
 
     # Main dashboard application area
-    st.title("⚡ Quick-Solver AI")
-    st.write("Type your query below, analyze the solution, and archive it to your account.")
+    st.markdown("<h1>⚡ Quick-Solver AI</h1>", unsafe_allow_html=True)
+    st.write("Type your question below, analyze the solution, and archive it to your account.")
     
-    user_query = st.text_area("What can I help you solve today?", placeholder="Type your question here...")
+    user_query = st.text_area("What can I help you solve today?", placeholder="Type your question or problem here...")
     
-    if st.button("Solve It"):
+    if st.button("SOLVE IT"):
         if user_query.strip() == "":
             st.warning("Please type a question first!")
         else:
@@ -140,20 +204,16 @@ else:
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
 
-    # Render Active Response & Save Dashboard Mechanics
+    # Render Active Response Container
     if st.session_state.current_response:
-        st.success("Solution Ready!")
-        st.markdown("### 📋 Answer:")
+        st.markdown("""
+            <div class="answer-box">
+                <h3 style="margin-top:0; color:#00f2fe;">✨ Solution Ready!</h3>
+            </div>
+        """, unsafe_allow_html=True)
         st.write(st.session_state.current_response)
         
-        if st.button("💾 Save to Dashboard"):
-            # Append to user data map
+        st.write("") # Spacer
+        if st.button("SAVE TO DASHBOARD"):
             st.session_state.chat_history[current_user].append({
-                "query": st.session_state.current_query,
-                "response": st.session_state.current_response
-            })
-            st.toast("Saved successfully to your sidebar history!", icon="🚀")
-            # Clear current panel selection
-            st.session_state.current_response = ""
-            st.session_state.current_query = ""
-            st.rerun()
+                "query": st.session_state.current
