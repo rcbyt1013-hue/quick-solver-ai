@@ -138,15 +138,16 @@ else:
         else:
             with st.spinner("Analyzing and solving..."):
                 try:
-                    # Look strictly into Streamlit Secrets for your secure API key
+                    # Pull the validated key safely from your Secrets
                     final_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
                     
                     if not final_key:
                         st.error("⚠️ No API Key configuration detected in Secrets!")
                     else:
                         client = genai.Client(api_key=final_key)
+                        # Fixed target string for the latest native SDK structure
                         response = client.models.generate_content(
-                            model='gemini-1.5-flash',
+                            model='gemini-2.5-flash',
                             contents=user_query,
                         )
                         st.session_state.current_query = user_query
